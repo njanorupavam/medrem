@@ -1,203 +1,214 @@
-# ESP32 Medicine Reminder Flutter App
+# Medicine Reminder: Flutter App + ESP32 Buzzer
 
-This Flutter app controls an ESP32 medicine reminder buzzer over HTTP while the ESP32 is running in Wi-Fi Access Point mode.
+## What this project is
+This project is a **medicine reminder system** made of two parts:
 
-Base URL used by the app:
+1. **ESP32 firmware (buzzer device)** that exposes simple HTTP endpoints.
+2. **Flutter app (mobile + web)** that sends commands to the ESP32 and shows the timer status.
 
-`http://192.168.4.1`
+The app and ESP32 must be on the **same Wi-Fi network** so the app can reach the ESP32's local IP address.
 
-Endpoints used:
+---
 
-- `GET /on`
-- `GET /off`
-- `GET /status`
+## Who is it for
+- **Patients** who need reminders to take medicine
+- **Caregivers or family members** who need a simple web or mobile interface to trigger or stop reminders
+- **Developers/students** learning IoT + Flutter integrations
 
-## Features
+---
 
-- ON button to trigger medicine reminder
-- OFF button to stop buzzer/reminder
-- Live status refresh every 2 seconds
-- Manual refresh button
-- Connection error handling
-- Works with ESP32 AP mode without internet
+## Why it exists
+- A phone or browser can control the reminder without touching the hardware.
+- The ESP32 can stay near the patient while the controller UI stays anywhere on the same Wi-Fi network.
 
-## Android Setup Fix
+---
 
-Your Android SDK path should be:
+## Where it runs
+- **ESP32** runs the buzzer firmware (Arduino-style C/C++).
+- **Flutter app** runs on:
+  - Android / iOS (mobile)
+  - Windows / macOS / Linux (desktop)
+  - Web browser (GitHub Pages or local web server)
 
-`C:\Users\kaasi\AppData\Local\Android\Sdk`
+---
 
-The missing part was:
+## When to use it
+- When you want a **simple medicine alarm** with a remote on/off control.
+- When you want a **visual schedule view** (calendar) and a **quick timer UI**.
 
-`C:\Users\kaasi\AppData\Local\Android\Sdk\cmdline-tools\latest\bin\sdkmanager.bat`
+---
 
-### Install Android command-line tools in PowerShell
+## How it works (full flow)
+1. The ESP32 boots and connects to your local Wi-Fi.
+2. The ESP32 exposes HTTP endpoints like `/status`, `/time`, `/set`, `/stop`.
+3. The Flutter app calls these endpoints over HTTP using the ESP32's local IP (for example: `http://10.130.109.134`).
+4. The UI shows the timer status and lets the user set time, stop the alarm, and select calendar days.
+5. The app polls the ESP32 every second to keep status and timer fresh.
 
-```powershell
-New-Item -ItemType Directory -Force -Path "C:\Users\kaasi\AppData\Local\Android\Sdk\cmdline-tools\latest"
-Invoke-WebRequest -Uri "https://dl.google.com/android/repository/commandlinetools-win-13114758_latest.zip" -OutFile "$env:TEMP\cmdline-tools.zip"
-Expand-Archive -Path "$env:TEMP\cmdline-tools.zip" -DestinationPath "$env:TEMP\cmdline-tools-extract" -Force
-Move-Item -Path "$env:TEMP\cmdline-tools-extract\cmdline-tools\*" -Destination "C:\Users\kaasi\AppData\Local\Android\Sdk\cmdline-tools\latest" -Force
-[Environment]::SetEnvironmentVariable("ANDROID_HOME","C:\Users\kaasi\AppData\Local\Android\Sdk","User")
-[Environment]::SetEnvironmentVariable("ANDROID_SDK_ROOT","C:\Users\kaasi\AppData\Local\Android\Sdk","User")
-$userPath = [Environment]::GetEnvironmentVariable("Path","User")
-$newPaths = @(
-  "C:\Users\kaasi\AppData\Local\Android\Sdk\platform-tools",
-  "C:\Users\kaasi\AppData\Local\Android\Sdk\cmdline-tools\latest\bin"
-)
-$combined = ($userPath.Split(';') + $newPaths | Select-Object -Unique) -join ';'
-[Environment]::SetEnvironmentVariable("Path",$combined,"User")
-```
+---
 
-Close PowerShell and open a new one, then run:
+## Core features
+- Live status updates
+- Live timer display
+- Set alarm time (hour + minute)
+- Stop alarm/buzzer
+- Quick preset time buttons (5, 10, 20 mins)
+- Calendar UI with multi-day selection
+- Dynamic island style schedule summary
 
-```powershell
-sdkmanager --version
-sdkmanager --sdk_root="C:\Users\kaasi\AppData\Local\Android\Sdk" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
-flutter doctor --android-licenses
-flutter doctor
-```
+---
 
-## Run On Android Phone
+## ESP32 API endpoints (current)
+These are called by the Flutter app:
 
-1. Enable Developer Options on the phone.
-2. Enable USB Debugging.
-3. Connect the phone by USB.
-4. Accept the debugging prompt on the phone.
-5. Check device detection:
+- `GET /status` -> returns JSON like `{ "status": "ON" }`
+- `GET /time` -> returns JSON like `{ "time": "00:45" }`
+- `GET /set?hour=H&minute=M` -> sets alarm time
+- `GET /stop` -> stops buzzer
 
-```powershell
-adb devices
-flutter devices
-```
+**Important:** These endpoints are **not secured**. Anyone on the same Wi-Fi network who knows the ESP32 IP can call them.
 
-6. Run the app:
+---
 
-```powershell
-cd C:\Users\kaasi\Downloads\jun\med_reminder_app
-flutter run
-```
+## Security note (very important)
+Right now, **anyone on the same Wi-Fi network** can control the buzzer if they know the ESP32 IP address. There is **no authentication** in the current firmware or app.
 
-## ESP32 AP Mode Notes
+If you want to restrict access, add one of these later:
+- a simple API key in the ESP32 endpoints
+- basic auth in the firmware
+- network isolation (guest Wi-Fi, firewall, VLAN)
 
-- Connect the phone to the ESP32 Wi-Fi network.
-- Keep the ESP32 IP as `192.168.4.1`.
-- If the phone disconnects because there is no internet, turn off mobile data or disable automatic network switching.
+---
 
-## Android Manifest Requirements
+## Languages and technologies used (and why)
 
-The app uses plain HTTP to the ESP32 local IP, so Android needs:
+### 1) Dart + Flutter
+- **Why:** Flutter provides a single UI codebase for Android, iOS, web, and desktop.
+- **Where used:** `lib/main.dart`, UI widgets, HTTP networking, calendar UI.
 
-- `android.permission.INTERNET`
-- `android:usesCleartextTraffic="true"`
+### 2) Arduino C/C++ (ESP32 firmware)
+- **Why:** ESP32 firmware is written in Arduino-style C/C++ for microcontroller performance and Wi-Fi control.
+- **Where used:** `buzz/buzz.ino` handles Wi-Fi connection, buzzer control, and HTTP routing.
 
-These are already added in `android/app/src/main/AndroidManifest.xml`.
+### 3) HTML/CSS/JavaScript (Web output)
+- **Why:** Flutter web builds to HTML/JS for browser execution.
+- **Where used:** `docs/` and `build/web/` output folders.
 
-## main.dart
+### 4) YAML
+- **Why:** Flutter and tools use YAML for configuration.
+- **Where used:** `pubspec.yaml`, `analysis_options.yaml`, GitHub Actions workflow.
 
-Current Flutter app code:
+### 5) Kotlin/Gradle (Android)
+- **Why:** Android builds use Gradle and Kotlin DSL for configuration.
+- **Where used:** `android/` folder.
+
+### 6) Swift/Objective-C (iOS)
+- **Why:** iOS build files are generated for native integration.
+- **Where used:** `ios/` folder.
+
+### 7) CMake/C++ (Desktop)
+- **Why:** Flutter desktop builds use CMake toolchains.
+- **Where used:** `windows/`, `linux/`, `macos/` folders.
+
+---
+
+## Project structure overview
+- `lib/main.dart` -> Flutter UI + HTTP logic
+- `buzz/buzz.ino` -> ESP32 firmware
+- `pubspec.yaml` -> Flutter dependencies
+- `docs/` -> Web build for GitHub Pages
+- `build/web/` -> Local web build output
+
+---
+
+## App configuration (important settings)
+
+### Base URL (ESP32 IP)
+In `lib/main.dart`:
 
 ```dart
-import 'dart:async';
+String baseUrl = "http://10.130.109.134"; // change to your ESP32 IP
+```
 
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+You must update this to match the ESP32's IP on your network.
 
-void main() {
-  runApp(const MyApp());
-}
+---
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+## How to run locally (web)
+```powershell
+cd C:\Users\kaasi\Downloads\jun\med_reminder_app
+flutter run -d chrome
+```
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Medicine Reminder',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-        useMaterial3: true,
-      ),
-      home: const HomePage(),
-    );
-  }
-}
+---
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+## How to build the web app
+```powershell
+flutter build web --release --base-href /medrem/
+```
 
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
+Then copy to `docs/` for GitHub Pages:
+```powershell
+Copy-Item -Path build\web -Destination docs -Recurse -Force
+New-Item -Path "docs/.nojekyll" -ItemType File -Force
+```
 
-class _HomePageState extends State<HomePage> {
-  static const String baseUrl = 'http://192.168.4.1';
+---
 
-  String _status = 'Checking device...';
-  String _message = 'Connect your phone to the ESP32 Wi-Fi access point.';
-  bool _isBusy = false;
-  bool _isConnected = false;
-  Timer? _pollTimer;
+## GitHub Pages deployment
+The repo uses the `/docs` folder for Pages.
 
-  @override
-  void initState() {
-    super.initState();
-    _fetchStatus();
-    _pollTimer = Timer.periodic(
-      const Duration(seconds: 2),
-      (_) => _fetchStatus(),
-    );
-  }
+1. Go to: `Settings -> Pages`
+2. Source: **Deploy from a branch**
+3. Branch: **main**
+4. Folder: **/docs**
 
-  @override
-  void dispose() {
-    _pollTimer?.cancel();
-    super.dispose();
-  }
+Live site:
+```
+https://njanorupavam.github.io/medrem
+```
 
-  Future<void> _sendCommand(String endpoint) async {
-    setState(() {
-      _isBusy = true;
-      _message = 'Sending command...';
-    });
+---
 
-    try {
-      final response = await http
-          .get(Uri.parse('$baseUrl/$endpoint'))
-          .timeout(const Duration(seconds: 5));
+## What the calendar currently does
+The calendar UI **allows multi-day selection**, but **those selections are not sent to the ESP32 yet**. They are displayed in the UI only. You can wire this later by adding a new endpoint like `/schedule` and POSTing a JSON payload.
 
-      if (response.statusCode == 200) {
-        await _fetchStatus(showLoading: false);
-        if (!mounted) return;
-        setState(() {
-          _message = 'Command sent successfully.';
-        });
-      } else {
-        if (!mounted) return;
-        setState(() {
-          _isConnected = false;
-          _message = 'ESP32 returned HTTP ${response.statusCode}.';
-        });
-      }
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _isConnected = false;
-        _message =
-            'Connection failed. Check ESP32 Wi-Fi and USB/mobile network settings.';
-      });
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isBusy = false;
-        });
-      }
-    }
-  }
+---
 
-  Future<void> _fetchStatus({bool showLoading = true}) async {
-    if (showLoading) {
+## Limitations (current)
+- No authentication on ESP32 endpoints
+- Base URL is hardcoded and must be updated manually
+- Calendar schedule is UI-only (not yet synced to ESP32)
+
+---
+
+## Frequently asked "WH" questions (complete answers)
+
+**Who uses it?**
+Patients, caregivers, and anyone who needs a scheduled medicine alert.
+
+**What does it do?**
+It shows a timer, lets you set an alarm, and triggers/stops a buzzer on ESP32.
+
+**When should it be used?**
+When you want timed medicine reminders without touching the buzzer device.
+
+**Where does it run?**
+Flutter app runs on web/mobile/desktop; buzzer logic runs on the ESP32.
+
+**Why is Flutter used?**
+One codebase can run everywhere and create a modern UI quickly.
+
+**How does the app communicate with ESP32?**
+Via HTTP GET requests to ESP32 endpoints on the same Wi-Fi network.
+
+---
+
+## Future improvements (optional)
+- Add authentication token to ESP32 endpoints
+- Add schedule sync from calendar to ESP32
+- Save last-used ESP32 IP in local storage
+- Add push notifications on mobile
       setState(() {
         _message = 'Refreshing status...';
       });
