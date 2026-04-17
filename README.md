@@ -41,7 +41,7 @@ The app and ESP32 must be on the **same Wi-Fi network** so the app can reach the
 ## How it works (full flow)
 1. The ESP32 boots and connects to your local Wi-Fi.
 2. The ESP32 exposes HTTP endpoints like `/status`, `/time`, `/set`, `/stop`.
-3. The Flutter app calls these endpoints over HTTP using the ESP32's local IP (for example: `http://10.130.109.134`).
+3. The Flutter app calls these endpoints over HTTP using the ESP32's local IP (for example: `http://10.61.137.134`).
 4. The UI shows the timer status and lets the user set time, stop the alarm, and select calendar days.
 5. The app polls the ESP32 every second to keep status and timer fresh.
 
@@ -128,7 +128,7 @@ In `lib/main.dart`:
 
 ```dart
 String baseUrl = "http://10.130.109.134"; // change to your ESP32 IP
-```
+
 
 You must update this to match the ESP32's IP on your network.
 

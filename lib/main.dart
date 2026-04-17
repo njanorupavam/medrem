@@ -29,7 +29,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
 
-  String baseUrl = "http://10.130.109.134"; // <-- change if needed
+  String baseUrl = "http://10.61.137.134"; // <-- change if needed
 
   String status = "Checking...";
   String time = "--:--";
