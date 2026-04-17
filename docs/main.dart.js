@@ -81836,7 +81836,7 @@ oa(){var s=0,r=A.T(t.H),q=1,p=[],o=this,n,m,l,k,j
 var $async$oa=A.U(function(a,b){if(a===1){p.push(b)
 s=q}for(;;)switch(s){case 0:q=3
 s=6
-return A.X(A.apI(A.fI("http://10.130.109.134/status")),$async$oa)
+return A.X(A.apI(A.fI("http://10.61.137.134/status")),$async$oa)
 case 6:n=b
 l=n
 m=B.cw.xu(0,A.atc(A.asP(l.e).c.a.h(0,"charset")).f_(0,l.w),null)
@@ -81858,7 +81858,7 @@ us(){var s=0,r=A.T(t.H),q=1,p=[],o=this,n,m,l,k,j
 var $async$us=A.U(function(a,b){if(a===1){p.push(b)
 s=q}for(;;)switch(s){case 0:q=3
 s=6
-return A.X(A.apI(A.fI("http://10.130.109.134/time")),$async$us)
+return A.X(A.apI(A.fI("http://10.61.137.134/time")),$async$us)
 case 6:n=b
 l=n
 m=B.cw.xu(0,A.atc(A.asP(l.e).c.a.h(0,"charset")).f_(0,l.w),null)
@@ -81881,7 +81881,7 @@ s=q}for(;;)switch(s){case 0:j=o.r.a.a
 i=o.w.a.a
 q=3
 s=6
-return A.X(A.apI(A.fI("http://10.130.109.134/set?hour="+A.k(j)+"&minute="+A.k(i))),$async$uH)
+return A.X(A.apI(A.fI("http://10.61.137.134/set?hour="+A.k(j)+"&minute="+A.k(i))),$async$uH)
 case 6:n=b
 l=n
 m=B.cw.xu(0,A.atc(A.asP(l.e).c.a.h(0,"charset")).f_(0,l.w),null)
@@ -81902,7 +81902,7 @@ return A.S($async$uH,r)},
 uN(){var s=0,r=A.T(t.H),q=this
 var $async$uN=A.U(function(a,b){if(a===1)return A.Q(b,r)
 for(;;)switch(s){case 0:s=2
-return A.X(A.apI(A.fI("http://10.130.109.134/stop")),$async$uN)
+return A.X(A.apI(A.fI("http://10.61.137.134/stop")),$async$uN)
 case 2:q.oa()
 return A.R(null,r)}})
 return A.S($async$uN,r)},
